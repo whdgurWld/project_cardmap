@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "7488195448",
+    "project_id": "cardmap-167f0",
+    "storage_bucket": "cardmap-167f0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:7488195448:android:af9ec3a0fa30050370168d",
+        "android_client_info": {
+          "package_name": "com.example.project_cardmap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIC4v3lcYH8vgEr4bdgNvBxvzpRj0QPKc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
