@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:project_cardmap/auth.dart';
 import 'package:project_cardmap/components/button.dart';
@@ -24,8 +26,28 @@ class _LoginPageState extends State<LoginPage> {
                 onTap: () async {
                   await Auth().signInWithGoogle();
 
-                  // ignore: use_build_context_synchronously
-                  Navigator.pushNamed(context, '/');
+                  final userDocRef = FirebaseFirestore.instance
+                      .collection('user')
+                      .doc(FirebaseAuth.instance.currentUser!.uid);
+
+                  final doc = await userDocRef.get();
+
+                  if (!doc.exists) {
+                    List list = <String>['null'];
+                    FirebaseFirestore.instance
+                        .collection('user')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .set({
+                      'name': FirebaseAuth.instance.currentUser!.displayName,
+                      'cardList': list,
+                    });
+
+                    // ignore: use_build_context_synchronously
+                    Navigator.pushNamed(context, '/add');
+                  } else {
+                    // ignore: use_build_context_synchronously
+                    Navigator.pushNamed(context, '/');
+                  }
                 },
                 text: 'Sign in with Google',
               ),

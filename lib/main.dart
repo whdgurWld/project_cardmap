@@ -30,8 +30,7 @@ Future<void> main() async {
 }
 
 /*
-카드 인식, Badges, Card Swiper, 
+카드 인식, Badges, Card Swiper
 DB Query 및 데이터 저장
 반복문으로 데이터 저장. 
-
 */
