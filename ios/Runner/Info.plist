@@ -47,6 +47,8 @@
 	<string>This app needs access to location when in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to location when open.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs acces to camera when using scanning feature</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:project_cardmap/auth.dart';
 import 'package:project_cardmap/components/button.dart';
+import 'package:project_cardmap/state.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -14,6 +16,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<ApplicationState>();
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: SafeArea(
@@ -33,21 +36,23 @@ class _LoginPageState extends State<LoginPage> {
                   final doc = await userDocRef.get();
 
                   if (!doc.exists) {
-                    List list = <String>['null'];
+                    Map<String, dynamic> cardMap = {};
                     FirebaseFirestore.instance
                         .collection('user')
                         .doc(FirebaseAuth.instance.currentUser!.uid)
                         .set({
                       'name': FirebaseAuth.instance.currentUser!.displayName,
-                      'cardList': list,
+                      'cardMap': cardMap,
                     });
 
                     // ignore: use_build_context_synchronously
-                    Navigator.pushNamed(context, '/add');
+                    Navigator.pushNamed(context, '/cardSwipe');
                   } else {
                     // ignore: use_build_context_synchronously
                     Navigator.pushNamed(context, '/');
                   }
+
+                  appState.init();
                 },
                 text: 'Sign in with Google',
               ),

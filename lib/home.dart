@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:project_cardmap/state.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,23 +36,16 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> readJsonFile() async {
     final String response =
-        await rootBundle.loadString('assets/json/seoul_adong.json');
+        await rootBundle.loadString('assets/json/seoul_love.json');
     final data = await json.decode(response);
     setState(() {
       items = data["items"];
     });
   }
 
-  Future<void> query() async {
-    // position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    // double lat = 0.0144927536231884;
-    // double lon = 0.0181818181818182;
-    // double distance = 200 * 0.000621371;
-    // 37.4929925, 127.030481
-    // 37.4962531  127.0377379
-    // .0035         .007
+  Future<void> query(String key) async {
+    mapController.clearOverlays();
 
-    // double lowerLat = 37.4929925 - (lat * distance);
     double lowerLat = 37.4962531 - 3 * 0.00092;
     double lowerLon = 127.0377379 - 3 * 0.0013;
     double greaterLat = 37.4962531 + 3 * 0.00092;
@@ -58,10 +53,11 @@ class _HomePageState extends State<HomePage> {
 
     GeoPoint lesserGeopoint = GeoPoint(lowerLat, lowerLon);
     GeoPoint greaterGeopoint = GeoPoint(greaterLat, greaterLon);
+    print("data$key");
 
     QuerySnapshot querySnapshot;
     querySnapshot = await FirebaseFirestore.instance
-        .collection("data")
+        .collection("data$key")
         .where("location",
             isGreaterThan: lesserGeopoint, isLessThan: greaterGeopoint)
         .get();
@@ -72,12 +68,25 @@ class _HomePageState extends State<HomePage> {
       GeoPoint gp = docs.get("location");
       if (gp.longitude > lesserGeopoint.longitude &&
           gp.longitude < greaterGeopoint.longitude) {
-        Coords coords = Coords(
+        Coords coords;
+        try {
+          coords = Coords(
+            name: docs.get("name"),
             location: docs.get("location"),
-            phone: docs.get("phone"),
             road_addr: docs.get("road_address"),
             addr: docs.get("address"),
-            name: docs.get("name"));
+            phone: docs.get("phone"),
+          );
+        } catch (e) {
+          coords = Coords(
+            name: docs.get("name"),
+            location: docs.get("location"),
+            road_addr: docs.get("road_address"),
+            addr: "",
+            phone: "",
+          );
+        }
+
         findCoords.add(coords);
       }
     }
@@ -86,12 +95,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void printMarker() {
-    //?��면에 ?��?��?�� 과정?�� findCoords 만큼 반복?��?��.
     for (int i = 0; i < findCoords.length; i++) {
       setMarker(i);
     }
-    //findCoords.clear();
-    //print("과연 ..... $findCoords");
     print("PrintMaker Done");
   }
 
@@ -205,24 +211,26 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(
                   height: 10,
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(30, 6, 30, 20),
-                  child: Text(
-                    findCoords[index].road_addr,
+                if (findCoords[index].road_addr != "")
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(30, 6, 30, 20),
+                    child: Text(
+                      findCoords[index].road_addr,
+                      style: const TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                const SizedBox(
+                  height: 10,
+                ),
+                if (findCoords[index].phone != "")
+                  Text(
+                    '전화번호 : ${findCoords[index].phone}',
                     style: const TextStyle(
                       fontSize: 18,
                     ),
                   ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  '전화번호 : ${findCoords[index].phone}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
-                ),
                 const SizedBox(
                   height: 90,
                 ),
@@ -270,12 +278,12 @@ class _HomePageState extends State<HomePage> {
   void addData() async {
     await readJsonFile();
 
-    for (int j = 2000; j < 10000; j++) {
+    for (int j = 0; j < 2000; j++) {
       try {
-        String name = items[j]["Name"];
+        String name = items[j]["name"];
         String query = items[j]["road_addr"];
-        String address = items[j]["Add"];
-        String phone = items[j]["Phone"];
+        // String address = items[j]["Add"];
+        // String phone = items[j]["Phone"];
 
         http.Response responseGeocode;
         responseGeocode = await http.get(
@@ -289,15 +297,14 @@ class _HomePageState extends State<HomePage> {
         String latitude = jsonDecode(jsonCoords)["addresses"][0]['y'];
         double latitude_d = double.parse(latitude);
 
-        // GeoPoint location = GeoPoint(latitude_d, longitude_d);
+        GeoPoint location = GeoPoint(latitude_d, longitude_d);
 
-        await FirebaseFirestore.instance.collection("data").add({
+        await FirebaseFirestore.instance.collection("data2").add({
           "name": name,
           "road_address": query,
-          "address": address,
-          "phone": phone,
-          "latitude": latitude_d,
-          "longitude": longitude_d,
+          // "address": address,
+          // "phone": phone,
+          "location": location,
         });
       } catch (e) {
         print("exception");
@@ -326,9 +333,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // setState(() {
-    //   getCardList();
-    // });
+    Map<String, String> map = {"1": "서울 아동복지카드", "2": "서울 사랑카드"};
+    var appState = context.watch<ApplicationState>();
+
+    // Map<String, dynamic> cardList = ;
 
     return Scaffold(
       key: scaffoldKey, //drawer
@@ -336,79 +344,87 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         shape: const BeveledRectangleBorder(),
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
           children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border:
-                            Border.all(width: 0.5, color: Colors.grey[200]!),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(90)),
-                      ),
-                      child: ClipOval(
-                        child: Image.network(
-                          FirebaseAuth.instance.currentUser!.photoURL
-                              .toString(),
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit
-                              .cover, // You can adjust the BoxFit based on your requirements
+            Expanded(
+              flex: 2,
+              child: DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border:
+                              Border.all(width: 0.5, color: Colors.grey[200]!),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(90)),
+                        ),
+                        child: ClipOval(
+                          child: Image.network(
+                            FirebaseAuth.instance.currentUser!.photoURL
+                                .toString(),
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit
+                                .cover, // You can adjust the BoxFit based on your requirements
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 5.0,
-                    ),
-                    Text(FirebaseAuth.instance.currentUser!.displayName
-                        .toString()),
-                    Text(
-                      FirebaseAuth.instance.currentUser!.email.toString(),
-                      style: const TextStyle(fontSize: 12),
-                    )
-                  ],
+                      const SizedBox(
+                        height: 5.0,
+                      ),
+                      Text(FirebaseAuth.instance.currentUser!.displayName
+                          .toString()),
+                      Text(
+                        FirebaseAuth.instance.currentUser!.email.toString(),
+                        style: const TextStyle(fontSize: 12),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 4.0),
-              child: Text(
-                '등록된 카드',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            Expanded(
+              flex: 5,
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 4.0),
+                    child: Text(
+                      '등록된 카드',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                  ),
+                  for (var keys in appState.card.keys)
+                    ListTile(
+                      trailing: const Icon(Icons.credit_card),
+                      title: Text(map[keys]!),
+                      onTap: () async {
+                        await query(keys);
+                        printMarker();
+                        scaffoldKey.currentState?.closeEndDrawer();
+                      },
+                    ),
+                  ListTile(
+                    trailing: const Icon(Icons.add),
+                    title: const Text('카드 추가하기'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/cardSwipe');
+                    },
+                  ),
+                ],
               ),
             ),
-            ListTile(
-              trailing: const Icon(Icons.credit_card),
-              title: const Text('문화 누리 카드'),
-              onTap: () {
-                addData();
-              },
-            ),
-            ListTile(
-              trailing: const Icon(Icons.credit_card),
-              title: const Text('아동 복지 카드'),
-              onTap: () async {
-                await query();
-                printMarker();
-              },
-            ),
-            ListTile(
-              trailing: const Icon(Icons.add),
-              title: const Text('카드 추가하기'),
-              onTap: () {
-                Navigator.pushNamed(context, '/add');
-              },
-            ),
-            Container(
+            Expanded(
+              flex: 1,
+              child: Container(
                 height: MediaQuery.of(context).size.height * 0.50,
                 alignment: Alignment.bottomLeft,
                 child: TextButton(
@@ -418,7 +434,9 @@ class _HomePageState extends State<HomePage> {
                     Navigator.pushNamed(context, '/login');
                   },
                   child: const Text('Logout'),
-                ))
+                ),
+              ),
+            ),
           ],
         ),
       ), //drawer
@@ -427,9 +445,8 @@ class _HomePageState extends State<HomePage> {
           isReady
               ? NaverMap(
                   options: NaverMapViewOptions(
-                    // naver map ?��?��?�� ?��?��?��?�� ?��?��
                     initialCameraPosition: initCameraPosition,
-                    locationButtonEnable: true, // ?�� ?��치�?? ?��????��?�� 버튼
+                    locationButtonEnable: true,
                     mapType: NMapType.basic,
                     nightModeEnable: true,
                     extent: const NLatLngBounds(
@@ -438,12 +455,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   onMapReady: (controller) async {
-                    // NaverMap.setLocation(locationSorce)
-                    // await getCardList();
-                    for (int i = 0; i < theCardList.length; i++) {
-                      // await readFile(
-                      // '${cardNameDictionary[theCardList[i]]}.json', i);
-                    }
                     mapController = controller;
                   },
                 )

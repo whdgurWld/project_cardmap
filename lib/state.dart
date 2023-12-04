@@ -5,27 +5,53 @@ import 'package:flutter/material.dart';
 import 'package:project_cardmap/firebase_options.dart';
 
 class ApplicationState extends ChangeNotifier {
+  Map<String, dynamic> card = {};
+
   ApplicationState() {
     init();
+    print("init");
   }
-
-  List<String> cardList = [];
 
   Future<void> init() async {
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
-
-    DocumentSnapshot<Map<String, dynamic>> tmp = await FirebaseFirestore
-        .instance
-        .collection('user')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .get();
-
-    cardList = (tmp.data()!['cardList'] as List<dynamic>).cast<String>();
-    print(cardList);
+    try {
+      await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform);
+      await fetchCardList();
+    } catch (e) {
+      print('Error initializing Firebase: $e');
+    }
   }
 
-  List<String> getCard() {
-    return cardList;
+  Future<void> fetchCardList() async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('user')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (snapshot.exists) {
+        card = (snapshot.data()!['cardMap'] as Map<String, dynamic>);
+        // print(cardList);
+        print('done');
+        print(card);
+        notifyListeners(); // Notify listeners that the data has been updated
+      } else {
+        print('Document does not exist');
+      }
+    } catch (e) {
+      print('Error fetching card list: $e');
+    }
+  }
+
+  Future<void> addMap(Map<String, dynamic> map) async {
+    FirebaseFirestore.instance
+        .collection("user")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .set({
+      'cardMap': map,
+      'name': FirebaseAuth.instance.currentUser!.displayName,
+    });
+    notifyListeners();
   }
 }
