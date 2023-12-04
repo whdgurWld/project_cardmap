@@ -84,9 +84,14 @@ class Settings extends StatelessWidget {
             ),
           ),
           HeightSpacer(myHeight: kSpacing / 2),
-          const ListTileBldr(
-            title: '카드 숫자로 등록',
-            icon: Icons.format_list_numbered,
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/textAdd');
+            },
+            child: const ListTileBldr(
+              title: '카드 숫자로 등록',
+              icon: Icons.format_list_numbered,
+            ),
           ),
           HeightSpacer(myHeight: kSpacing * 2),
           Align(

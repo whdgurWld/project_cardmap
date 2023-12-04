@@ -336,10 +336,8 @@ class _HomePageState extends State<HomePage> {
     Map<String, String> map = {"1": "서울 아동복지카드", "2": "서울 사랑카드"};
     var appState = context.watch<ApplicationState>();
 
-    // Map<String, dynamic> cardList = ;
-
     return Scaffold(
-      key: scaffoldKey, //drawer
+      key: scaffoldKey,
       endDrawer: Drawer(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
