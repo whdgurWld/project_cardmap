@@ -171,12 +171,12 @@ class _HomePageState extends State<HomePage> {
         position: point,
         caption: NOverlayCaption(
           text: overlayName,
-          color: Colors.lightGreen,
+          color: const Color.fromRGBO(63, 93, 170, 100),
         ),
         isCaptionPerspectiveEnabled: true,
         icon:
             const NOverlayImage.fromAssetImage('assets/images/CardmapLogo.png'),
-        size: const Size(50, 50),
+        size: const Size(60, 60),
         isHideCollidedMarkers: true,
         isHideCollidedSymbols: true,
         isHideCollidedCaptions: false);
@@ -240,7 +240,7 @@ class _HomePageState extends State<HomePage> {
                     height: 70,
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: Colors.lightGreen,
+                      color: Color.fromRGBO(63, 93, 170, 100),
                     ),
                     child: const Center(
                       child: Row(
@@ -293,11 +293,11 @@ class _HomePageState extends State<HomePage> {
 
         String jsonCoords = responseGeocode.body;
         String longitude = jsonDecode(jsonCoords)["addresses"][0]['x'];
-        double longitude_d = double.parse(longitude);
+        double longitudeD = double.parse(longitude);
         String latitude = jsonDecode(jsonCoords)["addresses"][0]['y'];
-        double latitude_d = double.parse(latitude);
+        double latitudeD = double.parse(latitude);
 
-        GeoPoint location = GeoPoint(latitude_d, longitude_d);
+        GeoPoint location = GeoPoint(latitudeD, longitudeD);
 
         await FirebaseFirestore.instance.collection("data2").add({
           "name": name,
@@ -501,7 +501,7 @@ class _HomePageState extends State<HomePage> {
                         iconSize: 25,
                         icon: const Icon(
                           Icons.menu_rounded,
-                          color: Colors.lightGreen,
+                          color: Color.fromRGBO(63, 93, 170, 100),
                         ),
                         onPressed: () {
                           scaffoldKey.currentState?.openEndDrawer();
