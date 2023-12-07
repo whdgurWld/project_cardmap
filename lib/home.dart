@@ -99,20 +99,21 @@ class HomePageState extends State<HomePage> {
     print(findCoords.length);
   }
 
-  void printMarker() {
+  void printMarker(ApplicationState appState) {
     for (int i = 0; i < findCoords.length; i++) {
-      setMarker(i);
+      setMarker(i, appState);
     }
     print("PrintMaker Done");
   }
 
-  void setMarker(int index) {
+  void setMarker(int index, ApplicationState appState) {
     //marker?�� ?��?��?�� �??��?���?, ?�� ?��면에 ?��?��?��.
     final NAddableOverlay<NOverlay<void>> overlay = makeOverlay(
       id: '$index',
       position: NLatLng(findCoords[index].location.latitude,
           findCoords[index].location.longitude),
       name: findCoords[index].name.toString(),
+      appState: appState,
     );
 
     overlay.setOnTapListener((overlay) async {
@@ -167,6 +168,7 @@ class HomePageState extends State<HomePage> {
     required NLatLng position,
     required String id,
     required String name,
+    required ApplicationState appState,
   }) {
     final overlayId = id;
     final point = position;
@@ -179,8 +181,10 @@ class HomePageState extends State<HomePage> {
           color: const Color.fromRGBO(63, 93, 170, 100),
         ),
         isCaptionPerspectiveEnabled: true,
-        icon:
-            const NOverlayImage.fromAssetImage('assets/images/CardmapLogo.png'),
+        icon: appState.favoriteList.contains(name)
+            ? const NOverlayImage.fromAssetImage('assets/images/MyFavorite.png')
+            : const NOverlayImage.fromAssetImage(
+                'assets/images/CardmapLogo.png'),
         size: const Size(60, 60),
         isHideCollidedMarkers: true,
         isHideCollidedSymbols: true,
@@ -305,6 +309,11 @@ class HomePageState extends State<HomePage> {
                         }
 
                         await appState.addFavorite(favoriteList);
+
+                        mapController.clearOverlays();
+                        printMarker(appState);
+
+                        Navigator.pop(context);
                       },
                     ),
                   ],
@@ -458,7 +467,7 @@ class HomePageState extends State<HomePage> {
                         onTap: () async {
                           if (map.containsKey(str)) {
                             await query(map[str]!);
-                            printMarker();
+                            printMarker(appState);
                           } else {
                             mapController.clearOverlays();
                           }
@@ -647,7 +656,7 @@ class HomePageState extends State<HomePage> {
           }
 
           await query(map[cardName]!);
-          printMarker();
+          printMarker(appState);
         },
       ),
     );

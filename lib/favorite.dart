@@ -79,7 +79,7 @@ class _CartPageState extends State<FavoritePage> {
         backgroundColor: Colors.grey,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        title: const Text('Wish List'),
+        title: const Text('즐겨찾기 항목'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
