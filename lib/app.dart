@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:project_cardmap/addCard.dart';
 import 'package:project_cardmap/cardSwipe.dart';
+import 'package:project_cardmap/favorite.dart';
 import 'package:project_cardmap/login.dart';
 import 'package:project_cardmap/home.dart';
 import 'package:project_cardmap/textCard.dart';
@@ -22,6 +23,7 @@ class CardMapp extends StatelessWidget {
         '/cardSwipe': (BuildContext context) => const CardSwipePage(
               title: "Card Selection",
             ),
+        '/favorite': (BuildContext context) => const FavoritePage(),
       },
       theme: ThemeData.light(useMaterial3: true),
     );
