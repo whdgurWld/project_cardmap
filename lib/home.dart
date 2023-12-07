@@ -262,14 +262,12 @@ class HomePageState extends State<HomePage> {
                                 const BorderRadius.all(Radius.circular(10)),
                             color: primaryColor,
                           ),
-
                           child: const Center(
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   Icons.drive_eta,
-
                                   color: Colors.white,
                                 ),
                                 SizedBox(
@@ -319,13 +317,14 @@ class HomePageState extends State<HomePage> {
                             favoriteList.add(findCoords[index].name);
                           }
 
-                        await appState.addFavorite(favoriteList);
+                          await appState.addFavorite(favoriteList);
 
-                        mapController.clearOverlays();
-                        printMarker(appState);
+                          mapController.clearOverlays();
+                          printMarker(appState);
 
-                        Navigator.pop(context);
-                      },
+                          Navigator.pop(context);
+                        },
+                      ),
                     ),
                   ],
                 ),
