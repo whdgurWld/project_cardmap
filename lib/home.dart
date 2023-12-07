@@ -6,7 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:project_cardmap/Declarations/Constants/constants.dart';
 import 'package:project_cardmap/state.dart';
+import '../Declarations/Constants/constants.dart';
+
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -196,7 +199,7 @@ class HomePageState extends State<HomePage> {
     showModalBottomSheet(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(30),
+            top: Radius.circular(40),
           ),
         ),
         context: context,
@@ -210,7 +213,7 @@ class HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(
-                  height: 55,
+                  height: 45,
                 ),
                 Text(
                   findCoords[index].name,
@@ -248,65 +251,73 @@ class HomePageState extends State<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    InkWell(
-                      child: Container(
-                        width: 250,
-                        height: 70,
-                        decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color: Color.fromRGBO(63, 93, 170, 100),
-                        ),
-                        child: const Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.drive_eta,
-                                color: Colors.white,
-                              ),
-                              SizedBox(
-                                width: 15,
-                              ),
-                              Text(
-                                "길찾기",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 23,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      onTap: () {
-                        directGuide(index);
-                        Navigator.pop(context);
-                      },
-                    ),
-                    InkWell(
-                      child: Container(
-                          width: 70,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
+                      child: InkWell(
+                        child: Container(
+                          width: 290,
                           height: 70,
                           decoration: BoxDecoration(
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(10)),
-                            color: Colors.yellow[900],
+                            color: primaryColor,
                           ),
-                          child: !favoriteList.contains(findCoords[index].name)
-                              ? const Icon(
-                                  Icons.star_border,
+
+                          child: const Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.drive_eta,
+
                                   color: Colors.white,
-                                )
-                              : const Icon(
-                                  Icons.star,
-                                  color: Colors.white,
-                                )),
-                      onTap: () async {
-                        if (favoriteList.contains(findCoords[index].name)) {
-                          favoriteList.remove(findCoords[index].name);
-                        } else {
-                          favoriteList.add(findCoords[index].name);
-                        }
+                                ),
+                                SizedBox(
+                                  width: 15,
+                                ),
+                                Text(
+                                  "길찾기",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 23,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        onTap: () {
+                          directGuide(index);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),
+                      child: InkWell(
+                        child: Container(
+                            width: 70,
+                            height: 70,
+                            decoration: const BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              color: Color.fromRGBO(215, 71, 71, 20),
+                            ),
+                            child: favoriteList.contains(findCoords[index].name)
+                                ? const Icon(
+                                    Icons.star_border,
+                                    color: Colors.white,
+                                  )
+                                : const Icon(
+                                    Icons.star,
+                                    color: Colors.yellow,
+                                  )),
+                        onTap: () async {
+                          if (favoriteList.contains(findCoords[index].name)) {
+                            favoriteList.remove(findCoords[index].name);
+                          } else {
+                            favoriteList.add(findCoords[index].name);
+                          }
 
                         await appState.addFavorite(favoriteList);
 
@@ -604,10 +615,10 @@ class HomePageState extends State<HomePage> {
                     ],
                   ),
                   const SizedBox(
-                    height: 7,
+                    height: 5.5,
                   ),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.90,
+                    width: MediaQuery.of(context).size.width * 0.83,
                     height: 29,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
@@ -668,10 +679,10 @@ class HomePageState extends State<HomePage> {
       child: InkWell(
         child: Container(
           height: 29,
-          decoration: const BoxDecoration(
-            color: Colors.lightGreen,
-            borderRadius: BorderRadius.all(
-              Radius.circular(15),
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: const BorderRadius.all(
+              Radius.circular(13),
             ),
           ),
           child: Padding(
