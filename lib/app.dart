@@ -18,7 +18,7 @@ class CardMapp extends StatelessWidget {
         '/add': (BuildContext context) => const AddPage(),
         '/login': (BuildContext context) => const LoginPage(),
         '/': (BuildContext context) => const HomePage(),
-        '/textAdd': (BuildContext context) => TextCard(),
+        '/textAdd': (BuildContext context) => const TextCard(),
         '/cardSwipe': (BuildContext context) => const CardSwipePage(
               title: "Card Selection",
             ),

@@ -37,12 +37,14 @@ class _LoginPageState extends State<LoginPage> {
 
                   if (!doc.exists) {
                     Map<String, dynamic> cardMap = {};
+                    List<String> selected = [];
                     FirebaseFirestore.instance
                         .collection('user')
                         .doc(FirebaseAuth.instance.currentUser!.uid)
                         .set({
                       'name': FirebaseAuth.instance.currentUser!.displayName,
                       'cardMap': cardMap,
+                      'selected': selected,
                     });
 
                     // ignore: use_build_context_synchronously

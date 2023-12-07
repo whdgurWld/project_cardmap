@@ -44,6 +44,8 @@ dependencies:
   mlkit_scanner: ^0.5.3
   card_swiper : ^3.0.0
   flutter_swiper_view: ^1.1.8
+  get: ^4.6.5
+  firebase_storage: ^11.2.5
 
 dev_dependencies:
   flutter_test:

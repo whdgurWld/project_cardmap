@@ -3,9 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:project_cardmap/firebase_options.dart';
+import 'package:project_cardmap/home.dart';
 
 class ApplicationState extends ChangeNotifier {
   Map<String, dynamic> card = {};
+  List<String> selected = [];
+  List<String> favoriteList = [];
+  List<Coords> findCoords = [];
 
   ApplicationState() {
     init();
@@ -32,10 +36,11 @@ class ApplicationState extends ChangeNotifier {
 
       if (snapshot.exists) {
         card = (snapshot.data()!['cardMap'] as Map<String, dynamic>);
+        selected = List.castFrom(snapshot.data()!['selected'] as List);
         // print(cardList);
-        print('done');
-        print(card);
-        notifyListeners(); // Notify listeners that the data has been updated
+        // print('done');
+        // print(card);
+        notifyListeners();
       } else {
         print('Document does not exist');
       }
@@ -50,6 +55,32 @@ class ApplicationState extends ChangeNotifier {
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .set({
       'cardMap': map,
+      'selected': selected,
+      'name': FirebaseAuth.instance.currentUser!.displayName,
+    });
+    notifyListeners();
+  }
+
+  Future<void> addCard(List<String> list) async {
+    FirebaseFirestore.instance
+        .collection("user")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .set({
+      'cardMap': card,
+      'selected': list,
+      'name': FirebaseAuth.instance.currentUser!.displayName,
+    });
+    notifyListeners();
+  }
+
+  Future<void> addFavorite(List<String> list) async {
+    FirebaseFirestore.instance
+        .collection("user")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .set({
+      'cardMap': card,
+      'selected': selected,
+      'favorite': list,
       'name': FirebaseAuth.instance.currentUser!.displayName,
     });
     notifyListeners();

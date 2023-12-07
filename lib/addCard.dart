@@ -153,7 +153,7 @@ class DropdownButtonExample extends StatefulWidget {
 class _DropdownButtonExampleState extends State<DropdownButtonExample> {
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<ApplicationState>();
+    // var appState = context.watch<ApplicationState>();
 
     return DropdownButton<String>(
       value: dropdownValue,

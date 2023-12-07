@@ -183,7 +183,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void infoWindow(int index) async {
-    // marker 를 클릭했을 때, 상세 정보를 띄워준다.
     if (!mounted) return;
     showModalBottomSheet(
         shape: const RoundedRectangleBorder(
@@ -193,8 +192,11 @@ class _HomePageState extends State<HomePage> {
         ),
         context: context,
         builder: (BuildContext context) {
+          var appState = context.watch<ApplicationState>();
+          List<String> favoriteList = appState.favoriteList;
           return SizedBox(
             height: 400,
+            width: MediaQuery.of(context).size.width,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -234,40 +236,73 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(
                   height: 90,
                 ),
-                InkWell(
-                  child: Container(
-                    width: 350,
-                    height: 70,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: Color.fromRGBO(63, 93, 170, 100),
-                    ),
-                    child: const Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.drive_eta,
-                            color: Colors.white,
-                          ),
-                          SizedBox(
-                            width: 15,
-                          ),
-                          Text(
-                            "길찾기",
-                            style: TextStyle(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    InkWell(
+                      child: Container(
+                        width: 250,
+                        height: 70,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          color: Color.fromRGBO(63, 93, 170, 100),
+                        ),
+                        child: const Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.drive_eta,
                                 color: Colors.white,
-                                fontSize: 23,
-                                fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Text(
+                                "길찾기",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
+                      onTap: () {
+                        directGuide(index);
+                        Navigator.pop(context);
+                      },
                     ),
-                  ),
-                  onTap: () {
-                    directGuide(index);
-                    Navigator.pop(context);
-                  },
+                    InkWell(
+                      child: Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10)),
+                            color: Colors.yellow[900],
+                          ),
+                          child: favoriteList.contains(findCoords[index].name)
+                              ? const Icon(
+                                  Icons.star_border,
+                                  color: Colors.white,
+                                )
+                              : const Icon(
+                                  Icons.star,
+                                  color: Colors.white,
+                                )),
+                      onTap: () async {
+                        if (favoriteList.contains(findCoords[index].name)) {
+                          favoriteList.remove(findCoords[index].name);
+                        } else {
+                          favoriteList.add(findCoords[index].name);
+                        }
+
+                        await appState.addFavorite(favoriteList);
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -333,8 +368,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, String> map = {"1": "서울 아동복지카드", "2": "서울 사랑카드"};
+    Map<String, String> map = {"서울 아동복지카드": "1", "서울 사랑카드": "2"};
+
     var appState = context.watch<ApplicationState>();
+    List<String> cardList = appState.selected;
+    // appState.findCoords = findCoords;
 
     return Scaffold(
       key: scaffoldKey,
@@ -400,15 +438,29 @@ class _HomePageState extends State<HomePage> {
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                   ),
-                  for (var keys in appState.card.keys)
-                    ListTile(
-                      trailing: const Icon(Icons.credit_card),
-                      title: Text(map[keys]!),
-                      onTap: () async {
-                        await query(keys);
-                        printMarker();
-                        scaffoldKey.currentState?.closeEndDrawer();
+                  for (var str in appState.selected)
+                    Dismissible(
+                      key: UniqueKey(),
+                      background: Container(
+                        color: Colors.red,
+                      ),
+                      onDismissed: (direction) {
+                        cardList.remove(str);
+                        appState.addCard(cardList);
                       },
+                      child: ListTile(
+                        trailing: const Icon(Icons.credit_card),
+                        title: Text(str),
+                        onTap: () async {
+                          if (map.containsKey(str)) {
+                            await query(map[str]!);
+                            printMarker();
+                          } else {
+                            mapController.clearOverlays();
+                          }
+                          scaffoldKey.currentState?.closeEndDrawer();
+                        },
+                      ),
                     ),
                   ListTile(
                     trailing: const Icon(Icons.add),
