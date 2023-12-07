@@ -12,11 +12,12 @@ import 'package:provider/provider.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  // String name;
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   final _search = TextEditingController();
   late Position position;
   bool isReady = false;
@@ -63,6 +64,8 @@ class _HomePageState extends State<HomePage> {
         .get();
 
     print(querySnapshot.size);
+
+    findCoords = [];
 
     for (var docs in querySnapshot.docs) {
       GeoPoint gp = docs.get("location");
@@ -283,7 +286,7 @@ class _HomePageState extends State<HomePage> {
                                 const BorderRadius.all(Radius.circular(10)),
                             color: Colors.yellow[900],
                           ),
-                          child: favoriteList.contains(findCoords[index].name)
+                          child: !favoriteList.contains(findCoords[index].name)
                               ? const Icon(
                                   Icons.star_border,
                                   color: Colors.white,
@@ -310,44 +313,44 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  void addData() async {
-    await readJsonFile();
+  // void addData() async {
+  //   await readJsonFile();
 
-    for (int j = 0; j < 2000; j++) {
-      try {
-        String name = items[j]["name"];
-        String query = items[j]["road_addr"];
-        // String address = items[j]["Add"];
-        // String phone = items[j]["Phone"];
+  //   for (int j = 0; j < 2000; j++) {
+  //     try {
+  //       String name = items[j]["name"];
+  //       String query = items[j]["road_addr"];
+  //       // String address = items[j]["Add"];
+  //       // String phone = items[j]["Phone"];
 
-        http.Response responseGeocode;
-        responseGeocode = await http.get(
-            Uri.parse(
-                'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=$query'),
-            headers: headerss);
+  //       http.Response responseGeocode;
+  //       responseGeocode = await http.get(
+  //           Uri.parse(
+  //               'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=$query'),
+  //           headers: headerss);
 
-        String jsonCoords = responseGeocode.body;
-        String longitude = jsonDecode(jsonCoords)["addresses"][0]['x'];
-        double longitudeD = double.parse(longitude);
-        String latitude = jsonDecode(jsonCoords)["addresses"][0]['y'];
-        double latitudeD = double.parse(latitude);
+  //       String jsonCoords = responseGeocode.body;
+  //       String longitude = jsonDecode(jsonCoords)["addresses"][0]['x'];
+  //       double longitudeD = double.parse(longitude);
+  //       String latitude = jsonDecode(jsonCoords)["addresses"][0]['y'];
+  //       double latitudeD = double.parse(latitude);
 
-        GeoPoint location = GeoPoint(latitudeD, longitudeD);
+  //       GeoPoint location = GeoPoint(latitudeD, longitudeD);
 
-        await FirebaseFirestore.instance.collection("data2").add({
-          "name": name,
-          "road_address": query,
-          // "address": address,
-          // "phone": phone,
-          "location": location,
-        });
-      } catch (e) {
-        print("exception");
-      }
+  //       await FirebaseFirestore.instance.collection("data2").add({
+  //         "name": name,
+  //         "road_address": query,
+  //         // "address": address,
+  //         // "phone": phone,
+  //         "location": location,
+  //       });
+  //     } catch (e) {
+  //       print("exception");
+  //     }
 
-      print(j);
-    }
-  }
+  //     print(j);
+  //   }
+  // }
 
   @override
   void initState() {
@@ -426,7 +429,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Expanded(
-              flex: 5,
+              flex: 4,
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
@@ -477,6 +480,29 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.50,
                 alignment: Alignment.bottomLeft,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Divider(height: 1),
+                    ListTile(
+                      trailing: Icon(
+                        Icons.stars_rounded,
+                        color: Colors.yellow[700],
+                      ),
+                      title: const Text('즐겨찾기'),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/favorite');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.50,
+                alignment: Alignment.centerLeft,
                 child: TextButton(
                   onPressed: () async {
                     await FirebaseAuth.instance.signOut();

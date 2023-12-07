@@ -37,9 +37,7 @@ class ApplicationState extends ChangeNotifier {
       if (snapshot.exists) {
         card = (snapshot.data()!['cardMap'] as Map<String, dynamic>);
         selected = List.castFrom(snapshot.data()!['selected'] as List);
-        // print(cardList);
-        // print('done');
-        // print(card);
+        favoriteList = List.castFrom(snapshot.data()!['favorite'] as List);
         notifyListeners();
       } else {
         print('Document does not exist');
@@ -56,6 +54,7 @@ class ApplicationState extends ChangeNotifier {
         .set({
       'cardMap': map,
       'selected': selected,
+      'favorite': favoriteList,
       'name': FirebaseAuth.instance.currentUser!.displayName,
     });
     notifyListeners();
@@ -68,6 +67,7 @@ class ApplicationState extends ChangeNotifier {
         .set({
       'cardMap': card,
       'selected': list,
+      'favorite': favoriteList,
       'name': FirebaseAuth.instance.currentUser!.displayName,
     });
     notifyListeners();
@@ -83,6 +83,7 @@ class ApplicationState extends ChangeNotifier {
       'favorite': list,
       'name': FirebaseAuth.instance.currentUser!.displayName,
     });
+    print(list);
     notifyListeners();
   }
 }
