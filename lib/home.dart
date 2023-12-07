@@ -19,14 +19,17 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   final _search = TextEditingController();
+  String selectedCard = '';
+  int clickedCardIndex = 0;
   late Position position;
   bool isReady = false;
   var scaffoldKey = GlobalKey<ScaffoldState>();
   late NCameraPosition initCameraPosition;
   late NaverMapController mapController;
+  Map<String, String> map = {"서울 아동복지카드": "1", "서울 사랑카드": "2"};
 
   List<Coords> findCoords = [];
-  List<dynamic> theCardList = [];
+  // List<dynamic> theCardList = [];
   List<dynamic> items = List.filled(10, [], growable: true);
 
   Map<String, String> headerss = {
@@ -66,7 +69,6 @@ class HomePageState extends State<HomePage> {
     print(querySnapshot.size);
 
     findCoords = [];
-
     for (var docs in querySnapshot.docs) {
       GeoPoint gp = docs.get("location");
       if (gp.longitude > lesserGeopoint.longitude &&
@@ -371,14 +373,13 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, String> map = {"서울 아동복지카드": "1", "서울 사랑카드": "2"};
-
     var appState = context.watch<ApplicationState>();
     List<String> cardList = appState.selected;
     // appState.findCoords = findCoords;
 
     return Scaffold(
       key: scaffoldKey,
+
       endDrawer: Drawer(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
@@ -540,56 +541,143 @@ class HomePageState extends State<HomePage> {
               const SizedBox(
                 height: 70,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Column(
                 children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.70,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(width: 1, color: Colors.grey[200]!),
-                      borderRadius: const BorderRadius.all(Radius.circular(15)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
-                      child: TextField(
-                        decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Enter a place to search',
-                            enabledBorder: InputBorder.none),
-                        controller: _search,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.70,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border:
+                              Border.all(width: 1, color: Colors.grey[200]!),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(15)),
+                        ),
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
+                          child: TextField(
+                            decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Enter a place to search',
+                                enabledBorder: InputBorder.none),
+                            controller: _search,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border:
+                              Border.all(width: 1, color: Colors.grey[200]!),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                        ),
+                        child: IconButton(
+                            iconSize: 25,
+                            icon: const Icon(
+                              Icons.menu_rounded,
+                              color: Color.fromRGBO(63, 93, 170, 100),
+                            ),
+                            onPressed: () {
+                              scaffoldKey.currentState?.openEndDrawer();
+                            }),
+                      ),
+                    ],
                   ),
                   const SizedBox(
-                    width: 10,
+                    height: 7,
                   ),
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(width: 1, color: Colors.grey[200]!),
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(10),
-                      ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.90,
+                    height: 29,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      children: [
+                        for (int i = 0; i < (appState.selected.length); i++)
+                          if (selectedCard == appState.selected[i])
+                            cardButton10(appState.selected[i])
+                          else
+                            cardButton(appState.selected[i], appState),
+                      ],
                     ),
-                    child: IconButton(
-                        iconSize: 25,
-                        icon: const Icon(
-                          Icons.menu_rounded,
-                          color: Color.fromRGBO(63, 93, 170, 100),
-                        ),
-                        onPressed: () {
-                          scaffoldKey.currentState?.openEndDrawer();
-                        }),
                   ),
                 ],
               )
             ],
           )
         ],
+      ),
+    );
+  }
+
+  Padding cardButton(String cardName, ApplicationState appState) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: InkWell(
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: Text(
+              cardName,
+            ),
+          ),
+        ),
+        onTap: () async {
+          selectedCard = cardName;
+          setState(() {});
+          for (int i = 0; i < appState.selected.length; i++) {
+            if (appState.selected[i] == cardName) clickedCardIndex = i;
+          }
+
+          await query(map[cardName]!);
+          printMarker();
+        },
+      ),
+    );
+  }
+
+  Padding cardButton10(String cardName) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: InkWell(
+        child: Container(
+          height: 29,
+          decoration: const BoxDecoration(
+            color: Colors.lightGreen,
+            borderRadius: BorderRadius.all(
+              Radius.circular(15),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: Text(
+              cardName,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+        onTap: () {
+          selectedCard = '';
+          setState(() {});
+          mapController.clearOverlays();
+        },
       ),
     );
   }
